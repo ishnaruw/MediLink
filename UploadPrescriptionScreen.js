@@ -89,12 +89,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     width: '80%',
   },
-  // successMessage: {
-  //   fontSize: 16,
-  //   color: 'green',
-  //   textAlign: 'center',
-  //   marginTop: 20,
-  // },
+  successMessage: {
+    fontSize: 16,
+    color: 'green',
+    textAlign: 'center',
+    marginTop: 20,
+  },
   modalContainer: {
     flex: 1,
     justifyContent: 'center',

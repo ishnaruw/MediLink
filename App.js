@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import UploadPrescriptionScreen from './UploadPrescriptionScreen';
+import ScheduleDeliveriesScreen from './ScheduleDeliveriesScreen';
 
 const Stack = createStackNavigator();
 
@@ -14,7 +15,7 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const handleScheduleDeliveries = () => {
-    console.log("Navigate to delivery scheduling screen");
+    navigation.navigate('ScheduleDeliveries');
   };
   
   const handleTrackMedication = () => {
@@ -71,6 +72,7 @@ const App = () => {
       <Stack.Navigator initialRouteName="Home">
         <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
         <Stack.Screen name="UploadPrescription" component={UploadPrescriptionScreen} />
+        <Stack.Screen name="ScheduleDeliveries" component={ScheduleDeliveriesScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
