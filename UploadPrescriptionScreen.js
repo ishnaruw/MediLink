@@ -6,13 +6,14 @@ const dummyPrescriptionImage = require('./assets/dummy_prescription.jpeg');
 
 const UploadPrescriptionScreen = () => {
   const navigation = useNavigation();
-  const [selectedImage, setSelectedImage] = useState(null);
+  //const [selectedImage, setSelectedImage] = useState(null);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
   useEffect(() => {
     if (showSuccessMessage) {
       // Automatically navigate to the home page after 3 seconds
       const timeout = setTimeout(() => {
+        setShowSuccessMessage(false);
         navigation.navigate('Home');
       }, 3000);
 
@@ -22,12 +23,15 @@ const UploadPrescriptionScreen = () => {
   }, [showSuccessMessage, navigation]);
 
   const handleUploadPress = () => {
-    // Mocking an upload process with a delay
-    setTimeout(() => {
-      // Set state to show the success message
-      setShowSuccessMessage(true);
-    }, 1000);
+    // Set state to show the success message immediately
+    setShowSuccessMessage(true);
   };
+
+  const handleOKPress = () => {
+    // Navigate to the home page
+    navigation.navigate('Home');
+  };
+  
 
   const handleCancelPress = () => {
     // Implement logic to cancel the upload
@@ -38,11 +42,6 @@ const UploadPrescriptionScreen = () => {
     <View style={styles.container}>
       <Text style={styles.title}>Upload Prescription Image</Text>
       <Image source={dummyPrescriptionImage} style={styles.image} />
-      {/* {showSuccessMessage && (
-        <Text style={styles.successMessage}>
-          Prescription uploaded successfully! Our team will look into the prescription and confirm the order.
-        </Text>
-      )} */}
       <Modal
         visible={showSuccessMessage}
         animationType="slide"
@@ -54,6 +53,7 @@ const UploadPrescriptionScreen = () => {
             <Text style={styles.successMessage}>
               Prescription uploaded successfully! Our team will look into the prescription and confirm the order.
             </Text>
+            <Button title="OK" onPress={handleOKPress} />
           </View>
         </View>
       </Modal>
@@ -89,12 +89,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     width: '80%',
   },
-  successMessage: {
-    fontSize: 16,
-    color: 'green',
-    textAlign: 'center',
-    marginTop: 20,
-  },
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -111,6 +105,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: 'green',
     textAlign: 'center',
+    marginBottom: 20,
   },
 });
 

@@ -2,10 +2,13 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, Button, Modal } from 'react-native';
 import DatePicker from '@react-native-community/datetimepicker';
 import { FlatList } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 const ScheduleDeliveriesScreen = ({ navigation }) => {
   const [selectedDate, setSelectedDate] = useState(new Date()); // Initial date value set to current date
   const [showErrorModal, setShowErrorModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const errorMessage = "You cannot select a date in the past. Please select a new date.";
 
   // Hardcoded sample data for medicines
@@ -43,14 +46,30 @@ const ScheduleDeliveriesScreen = ({ navigation }) => {
     );
   };
 
-  const handleScheduleDelivery = () => {
+  const handleScheduleDelivery = async () => {
     const currentDate = new Date();
     if (!selectedDate || selectedDate < currentDate) {
       setShowErrorModal(true);
       return;
     }
-    console.log("selectedDate: " + selectedDate);
-    //navigation.navigate('TrackMedication', { selectedDate });
+  
+    // Save the selected date to AsyncStorage
+    try {
+      await AsyncStorage.setItem('selectedDate', JSON.stringify(selectedDate));
+      console.log("Selected date saved successfully.");
+      setShowSuccessModal(true);
+    } catch (error) {
+      console.error("Error saving selected date:", error);
+    }
+  
+    // Navigate to the next screen or perform other actions
+    //navigation.navigate('TrackMedication');
+  };
+
+  const handleTrackDetails = () => {
+    // Navigate to TrackMedication page
+    setShowSuccessModal(false);
+    navigation.navigate('TrackMedication');
   };
 
   return (
@@ -78,6 +97,21 @@ const ScheduleDeliveriesScreen = ({ navigation }) => {
 
       <Button title="Schedule Delivery" onPress={handleScheduleDelivery} />
       <ErrorMessageModal />
+      {/* Success message modal */}
+      <Modal
+        visible={showSuccessModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowSuccessModal(false)}
+      >
+        {/* Success message content */}
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text>Order scheduled successfully!</Text>
+            <Button title="Track Details" onPress={handleTrackDetails} />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };

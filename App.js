@@ -4,6 +4,8 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import UploadPrescriptionScreen from './UploadPrescriptionScreen';
 import ScheduleDeliveriesScreen from './ScheduleDeliveriesScreen';
+import TrackMedicationScreen from './TrackMedicationScreen';
+import 'react-native-gesture-handler'; 
 
 const Stack = createStackNavigator();
 
@@ -19,7 +21,7 @@ const HomeScreen = ({ navigation }) => {
   };
   
   const handleTrackMedication = () => {
-    console.log("Navigate to medication tracking screen");
+    navigation.navigate('TrackMedication');
   };
 
   const handleDismissWarning = () => {
@@ -73,6 +75,7 @@ const App = () => {
         <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
         <Stack.Screen name="UploadPrescription" component={UploadPrescriptionScreen} />
         <Stack.Screen name="ScheduleDeliveries" component={ScheduleDeliveriesScreen} />
+        <Stack.Screen name="TrackMedication" component={TrackMedicationScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
