@@ -49,7 +49,7 @@ const HomeScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={handleWelcomeMessageClick}>
-        <Text style={styles.title}>Welcome to Your Medication App</Text>
+        <Text style={styles.title}>Welcome to Your MediLink</Text>
       </TouchableOpacity>
       {renderWarningMessage()}
       <View style={styles.buttonContainer}>
