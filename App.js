@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Button } from 'react-native';
 import UploadPrescriptionScreen from './UploadPrescriptionScreen';
 import ScheduleDeliveriesScreen from './ScheduleDeliveriesScreen';
 import TrackMedicationScreen from './TrackMedicationScreen';
@@ -12,6 +12,8 @@ const Stack = createStackNavigator();
 const HomeScreen = ({ navigation }) => {
   const [medicationStatus, setMedicationStatus] = useState('low'); // 'normal', 'low', 'empty'
   const [showWarning, setShowWarning] = useState(true);
+  const [text, setText] = useState('');
+
   const handleRefillPrescriptions = () => {
     navigation.navigate('UploadPrescription');
   };
@@ -26,6 +28,10 @@ const HomeScreen = ({ navigation }) => {
 
   const handleDismissWarning = () => {
     setShowWarning(false);    
+  };
+
+  const handleSaveText = () => {
+    console.log("Text saved:", text);
   };
   
     const handleWelcomeMessageClick = () => {
@@ -63,6 +69,13 @@ const HomeScreen = ({ navigation }) => {
           <Text style={styles.buttonText}>Track Medication</Text>
         </TouchableOpacity>
       </View>
+      <TextInput
+        style={styles.input}
+        onChangeText={setText}
+        value={text}
+        placeholder="Enter some text"
+      />
+      <Button title="Save Text" onPress={handleSaveText} />
     </View>
   );
 };
@@ -127,6 +140,14 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  input: {
+    height: 40,
+    width: '80%',
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginBottom: 20,
+    paddingHorizontal: 10,
   },
 });
 
