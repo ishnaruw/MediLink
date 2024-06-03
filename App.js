@@ -5,6 +5,8 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import UploadPrescriptionScreen from './UploadPrescriptionScreen';
 import ScheduleDeliveriesScreen from './ScheduleDeliveriesScreen';
 import TrackMedicationScreen from './TrackMedicationScreen';
+import RegisterScreen from './RegisterScreen';
+import LoginScreen from './LoginScreen';
 import 'react-native-gesture-handler'; 
 
 const Stack = createStackNavigator();
@@ -71,7 +73,9 @@ const App = () => {
   
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home">
+      <Stack.Navigator initialRouteName="Login">
+        <Stack.Screen name="Register" component={RegisterScreen} />
+        <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
         <Stack.Screen name="UploadPrescription" component={UploadPrescriptionScreen} />
         <Stack.Screen name="ScheduleDeliveries" component={ScheduleDeliveriesScreen} />
