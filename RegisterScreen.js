@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import auth from '@react-native-firebase/auth';
-import db from '@react-native-firebase/database'
 
 const RegisterScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -20,11 +18,6 @@ const RegisterScreen = ({ navigation }) => {
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailPattern.test(email);
   };
-
-  // const createProfile = async (response: FirebaseAuthTypes.UserCredential) => {
-  //   db().ref('/users/${response.user.uid}').set({name});
-
-  // };
 
   const handleRegister = async () => {
     if (!isValidEmail(email)) {
@@ -44,16 +37,16 @@ const RegisterScreen = ({ navigation }) => {
       return;
     }
     // Create user with email and password
-    const response = await auth()
-      .createUserWithEmailAndPassword(email, password)
-      .catch((error) => {
-      if (error.code === 'auth/email-already-in-use') {
-        Alert.alert('Error', 'Email address is already in use');
-      } else {
-        Alert.alert('Error', 'Registration failed. Please try again later');
-      }
-      console.error(error);
-    });
+    // const response = await auth()
+    //   .createUserWithEmailAndPassword(email, password)
+    //   .catch((error) => {
+    //   if (error.code === 'auth/email-already-in-use') {
+    //     Alert.alert('Error', 'Email address is already in use');
+    //   } else {
+    //     Alert.alert('Error', 'Registration failed. Please try again later');
+    //   }
+    //   console.error(error);
+    // });
     // if(response.user){
     //   await createProfile(response);
     // }
