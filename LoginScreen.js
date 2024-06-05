@@ -4,23 +4,30 @@ import * as SecureStore from 'expo-secure-store';
 import { Ionicons } from '@expo/vector-icons';
 import bcrypt from 'react-native-bcrypt';
 import { useAuth } from './AuthContext';
+import { useFocusEffect } from '@react-navigation/native'; // Import useFocusEffect
 
 const LoginScreen = ({ navigation }) => {
   const { setIsLoggedIn } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  //const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     checkLogin();
   }, []);
 
+  useFocusEffect(
+    React.useCallback(() => {
+      // Clear the email and password fields when the screen gains focus
+      setEmail('');
+      setPassword('');
+    }, [])
+  );
+
   const checkLogin = async () => {
     const userEmail = await SecureStore.getItemAsync('userEmail');
     const userPassword = await SecureStore.getItemAsync('userPassword');
     if (userEmail && userPassword) {
-      // Automatically navigate to home if already logged in
       setIsLoggedIn(true);
       navigation.navigate('Home');
     }
@@ -32,17 +39,15 @@ const LoginScreen = ({ navigation }) => {
 
   const handleLogin = async () => {
     try {
-      // Perform login authentication
       const storedEmail = await SecureStore.getItemAsync('userEmail');
       const storedPassword = await SecureStore.getItemAsync('userPassword');
 
       if (!storedEmail || !storedPassword) {
         throw new Error('No email or password stored');
       }
-      // Trim inputs to remove leading/trailing whitespace
+      
       const trimmedEmail = email.trim();
       const trimmedPassword = password.trim();
-      // Compare stored email and hashed password with input
       const isEmailMatch = trimmedEmail === storedEmail;
       const isPasswordMatch = bcrypt.compareSync(trimmedPassword, storedPassword);
 
