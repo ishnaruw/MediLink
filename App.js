@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Button} from 'react-native';
 import UploadPrescriptionScreen from './UploadPrescriptionScreen';
 import ScheduleDeliveriesScreen from './ScheduleDeliveriesScreen';
 import TrackMedicationScreen from './TrackMedicationScreen';
@@ -16,6 +16,29 @@ const HomeScreen = ({ navigation }) => {
   const [showWarning, setShowWarning] = useState(true);
   const handleRefillPrescriptions = () => {
     navigation.navigate('UploadPrescription');
+  };
+
+  const sendSMS = async () => {
+    try {
+      const response = await fetch('http://192.168.86.34:3000/send-sms', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },  
+        body: JSON.stringify({
+          to: '+1 425 648 9936',
+          message: 'Hello from Medilink!',
+        }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        console.log('SMS sent successfully:', data.messageSid);
+      } else {
+        console.log('Failed to send SMS:', data.error);
+      }
+    } catch (error) {
+      console.error('Error sending SMS:', error);
+    }
   };
 
   const handleScheduleDeliveries = () => {
@@ -64,6 +87,9 @@ const HomeScreen = ({ navigation }) => {
         <TouchableOpacity style={styles.button} onPress={handleTrackMedication}>
           <Text style={styles.buttonText}>Track Medication</Text>
         </TouchableOpacity>
+      </View>
+      <View>
+        <Button title="Send SMS" onPress={sendSMS} />
       </View>
     </View>
   );

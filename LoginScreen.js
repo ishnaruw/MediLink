@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Button } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as SMS from 'expo-sms';
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -18,6 +19,21 @@ const LoginScreen = ({ navigation }) => {
 
   const togglePasswordVisibility = () => {
     setIsPasswordVisible(!isPasswordVisible);
+  };
+
+  const sendSMS = async () => {
+    const isAvailable = await SMS.isAvailableAsync();
+    if (isAvailable) {
+      // Sending an SMS!
+      const { result } = await SMS.sendSMSAsync(
+        ['4255984994'], // Array of recipients
+        'Hello from Medilink!'
+      );
+      console.log(result);
+    } else {
+      // Misfortune... there's no SMS available on this device
+      console.log('SMS is not available on this device');
+    }
   };
 
   return (
@@ -50,7 +66,11 @@ const LoginScreen = ({ navigation }) => {
       <TouchableOpacity onPress={() => navigation.navigate('Register')}>
         <Text style={styles.linkText}>Don't have an account? Register</Text>
       </TouchableOpacity>
+      <View>
+      <Button title="Send SMS" onPress={sendSMS} />
     </View>
+    </View>
+    
   );
 };
 
