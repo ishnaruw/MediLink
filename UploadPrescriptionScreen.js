@@ -1,40 +1,72 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Button, Image, Modal } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import * as ImagePicker from 'expo-image-picker';
+import axios from 'axios';
 
 const dummyPrescriptionImage = require('./assets/dummy_prescription.jpeg');
 
 const UploadPrescriptionScreen = () => {
   const navigation = useNavigation();
-  //const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setSelectedImage(result.assets[0]);
+    }
+  };
+
+  const uploadImage = async () => {
+    if (selectedImage) {
+      const formData = new FormData();
+      formData.append('image', {
+        uri: selectedImage.uri,
+        type: 'image/jpeg',
+        name: 'photo.jpg',
+      });
+
+      try {
+        const response = await axios.post('http://192.168.86.34:4000/upload', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        console.log('Upload success:', response.data);
+        setShowSuccessMessage(true);
+      } catch (error) {
+        console.log('Upload failed:', error);
+      }
+    }
+  };
 
   useEffect(() => {
     if (showSuccessMessage) {
-      // Automatically navigate to the home page after 3 seconds
       const timeout = setTimeout(() => {
         setShowSuccessMessage(false);
         navigation.navigate('Home');
       }, 3000);
 
-      // Clean up the timeout to avoid memory leaks
       return () => clearTimeout(timeout);
     }
   }, [showSuccessMessage, navigation]);
 
   const handleUploadPress = () => {
-    // Set state to show the success message immediately
     setShowSuccessMessage(true);
   };
 
   const handleOKPress = () => {
-    // Navigate to the home page
     navigation.navigate('Home');
   };
-  
 
   const handleCancelPress = () => {
-    // Implement logic to cancel the upload
     console.log("Upload cancelled");
   };
 
@@ -57,6 +89,11 @@ const UploadPrescriptionScreen = () => {
           </View>
         </View>
       </Modal>
+      <View style={styles.container}>
+        <Button title="Pick an image from gallery" onPress={pickImage} />
+        {selectedImage && <Image source={{ uri: selectedImage.uri }} style={styles.image} />}
+        <Button title="Upload Image" onPress={uploadImage} />
+      </View>
       {!showSuccessMessage && (
         <View style={styles.buttonsContainer}>
           <Button title="Upload" onPress={handleUploadPress} />
@@ -82,7 +119,7 @@ const styles = StyleSheet.create({
   image: {
     width: 200,
     height: 200,
-    marginBottom: 20,
+    marginTop: 20,
   },
   buttonsContainer: {
     flexDirection: 'row',
