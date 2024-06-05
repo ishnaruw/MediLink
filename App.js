@@ -8,6 +8,7 @@ import TrackMedicationScreen from './TrackMedicationScreen';
 import RegisterScreen from './RegisterScreen';
 import LoginScreen from './LoginScreen';
 import 'react-native-gesture-handler'; 
+import * as SecureStore from 'expo-secure-store';
 
 const Stack = createStackNavigator();
 
@@ -40,6 +41,13 @@ const HomeScreen = ({ navigation }) => {
       console.error('Error sending SMS:', error);
     }
   };
+
+  const handleLogout = async () => {
+    await SecureStore.deleteItemAsync('userEmail');
+    await SecureStore.deleteItemAsync('userPassword');
+    navigation.navigate('Login');
+  };
+  
 
   const handleScheduleDeliveries = () => {
     navigation.navigate('ScheduleDeliveries');
@@ -86,6 +94,9 @@ const HomeScreen = ({ navigation }) => {
         </TouchableOpacity>
         <TouchableOpacity style={styles.button} onPress={handleTrackMedication}>
           <Text style={styles.buttonText}>Track Medication</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={handleLogout}>
+          <Text style={styles.buttonText}>Logout</Text>
         </TouchableOpacity>
       </View>
       <View>

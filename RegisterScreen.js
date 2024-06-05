@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as SecureStore from 'expo-secure-store';
+import bcrypt from 'react-native-bcrypt';
 
 const RegisterScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -12,7 +14,7 @@ const RegisterScreen = ({ navigation }) => {
   const toggleRetypedPasswordVisibility = () => {
     setIsRetypedPasswordVisible(!isRetypedPasswordVisible);
   };
-  
+
   const isValidEmail = (email) => {
     // Regular expression for email validation
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -20,40 +22,35 @@ const RegisterScreen = ({ navigation }) => {
   };
 
   const handleRegister = async () => {
-    if (!isValidEmail(email)) {
-      Alert.alert('Error', 'Please enter a valid email address');
-      return;
-    }
-    if (password.length < 8) {
-      Alert.alert('Error', 'Password must be at least 8 characters long');
-      return;
-    }
-    if (email === '' || password === '' || retypedPassword === '') {
-      Alert.alert('Error', 'Please fill in all fields');
-      return; 
-    }
-    if (password !== retypedPassword) {
-      Alert.alert('Error', 'Passwords do not match');
-      return;
-    }
-    // Create user with email and password
-    // const response = await auth()
-    //   .createUserWithEmailAndPassword(email, password)
-    //   .catch((error) => {
-    //   if (error.code === 'auth/email-already-in-use') {
-    //     Alert.alert('Error', 'Email address is already in use');
-    //   } else {
-    //     Alert.alert('Error', 'Registration failed. Please try again later');
-    //   }
-    //   console.error(error);
-    // });
-    // if(response.user){
-    //   await createProfile(response);
-    // }
-    console.log('User registered:', email);
-    navigation.navigate('Login');
-  };
+    try {
+      if (!isValidEmail(email)) {
+        throw new Error('Invalid email address');
+      }
   
+      if (password.length < 8) {
+        throw new Error('Password must be at least 8 characters long');
+      }
+  
+      if (password !== retypedPassword) {
+        throw new Error('Passwords do not match');
+      }
+  
+      // Hash the password
+      const salt = bcrypt.genSaltSync(10);
+      const hashedPassword = bcrypt.hashSync(password, salt);
+  
+      // Store email and hashed password in SecureStore
+      await SecureStore.setItemAsync('userEmail', email);
+      await SecureStore.setItemAsync('userPassword', hashedPassword);
+  
+      console.log('User registered:', email);
+      Alert.alert('Success', 'Registration successful');
+      navigation.navigate('Login');
+    } catch (error) {
+      console.error('Error during registration:', error.message);
+      Alert.alert('Error', 'Registration failed. Please try again later');
+    }
+  };
 
   const togglePasswordVisibility = () => {
     setIsPasswordVisible(!isPasswordVisible);

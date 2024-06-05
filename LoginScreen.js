@@ -1,45 +1,68 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Button } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import * as SecureStore from 'expo-secure-store';
 import { Ionicons } from '@expo/vector-icons';
-import * as SMS from 'expo-sms';
+import bcrypt from 'react-native-bcrypt';
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
-  const handleLogin = () => {
-    if (email === '' || password === '') {
-      Alert.alert('Error', 'Please fill in both fields');
-      return;
+  useEffect(() => {
+    checkLogin();
+  }, []);
+
+  const checkLogin = async () => {
+    const userEmail = await SecureStore.getItemAsync('userEmail');
+    const userPassword = await SecureStore.getItemAsync('userPassword');
+    if (userEmail && userPassword) {
+      // Automatically navigate to home if already logged in
+      navigation.navigate('Home');
     }
-    console.log('User logged in:', email);
-    navigation.navigate('Home');
   };
 
   const togglePasswordVisibility = () => {
     setIsPasswordVisible(!isPasswordVisible);
   };
 
-  const sendSMS = async () => {
-    const isAvailable = await SMS.isAvailableAsync();
-    if (isAvailable) {
-      // Sending an SMS!
-      const { result } = await SMS.sendSMSAsync(
-        ['4255984994'], // Array of recipients
-        'Hello from Medilink!'
-      );
-      console.log(result);
-    } else {
-      // Misfortune... there's no SMS available on this device
-      console.log('SMS is not available on this device');
+  const handleLogin = async () => {
+    try {
+      // Retrieve stored email and hashed password from SecureStore
+      const storedEmail = await SecureStore.getItemAsync('userEmail');
+      const storedPassword = await SecureStore.getItemAsync('userPassword');
+  
+      if (!storedEmail || !storedPassword) {
+        throw new Error('No email or password stored');
+      }
+  
+      // Trim inputs to remove leading/trailing whitespace
+      const trimmedEmail = email.trim();
+      const trimmedPassword = password.trim();
+  
+      // Compare stored email and hashed password with input
+      const isEmailMatch = trimmedEmail === storedEmail;
+      const isPasswordMatch = bcrypt.compareSync(trimmedPassword, storedPassword);
+  
+      if (isEmailMatch && isPasswordMatch) {
+        Alert.alert('Success', 'Login successful');
+        navigation.navigate('Home');
+      } else {
+        throw new Error('Invalid email or password');
+      }
+    } catch (error) {
+      console.error('Error during login:', error.message);
+      Alert.alert('Error', 'Invalid email or password');
     }
   };
+  
+  
+  
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Welcome to MediLink</Text>
-      <Text style={styles.subtitle}>Your Trusted Medicine Partner for Seniors</Text>
+      <Text style={styles.title}>Login</Text>
+      <Text style={styles.subtitle}>Welcome back to MediLink</Text>
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
@@ -60,17 +83,14 @@ const LoginScreen = ({ navigation }) => {
           <Ionicons name={isPasswordVisible ? 'eye-off' : 'eye'} size={24} color="gray" />
         </TouchableOpacity>
       </View>
+
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Login</Text>
       </TouchableOpacity>
       <TouchableOpacity onPress={() => navigation.navigate('Register')}>
         <Text style={styles.linkText}>Don't have an account? Register</Text>
       </TouchableOpacity>
-      <View>
-      <Button title="Send SMS" onPress={sendSMS} />
     </View>
-    </View>
-    
   );
 };
 
