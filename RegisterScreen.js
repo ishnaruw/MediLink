@@ -35,11 +35,17 @@ const RegisterScreen = ({ navigation }) => {
         throw new Error('Passwords do not match');
       }
   
+      // Check if user already registered
+      const storedEmail = await SecureStore.getItemAsync('userEmail');
+      if (storedEmail) {
+        throw new Error('User already registered');
+      }
+  
       // Hash the password
       const salt = bcrypt.genSaltSync(10);
       const hashedPassword = bcrypt.hashSync(password, salt);
   
-      // Store email and hashed password in SecureStore
+      // Store email and hashed password permanently
       await SecureStore.setItemAsync('userEmail', email);
       await SecureStore.setItemAsync('userPassword', hashedPassword);
   

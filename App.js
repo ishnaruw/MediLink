@@ -9,6 +9,8 @@ import RegisterScreen from './RegisterScreen';
 import LoginScreen from './LoginScreen';
 import 'react-native-gesture-handler'; 
 import * as SecureStore from 'expo-secure-store';
+import { AuthProvider } from './AuthContext';
+import { useAuth } from './AuthContext';
 
 const Stack = createStackNavigator();
 
@@ -41,11 +43,16 @@ const HomeScreen = ({ navigation }) => {
       console.error('Error sending SMS:', error);
     }
   };
-
+  const { isLoggedIn, setIsLoggedIn } = useAuth();
   const handleLogout = async () => {
-    await SecureStore.deleteItemAsync('userEmail');
-    await SecureStore.deleteItemAsync('userPassword');
-    navigation.navigate('Login');
+    try {
+      // Clear the session
+      setIsLoggedIn(false);
+      navigation.navigate('Login');
+    } catch (error) {
+      console.error('Error during logout:', error.message);
+      Alert.alert('Error', 'Logout failed. Please try again later');
+    }
   };
   
 
@@ -110,6 +117,7 @@ const App = () => {
   
   return (
     <NavigationContainer>
+      <AuthProvider>
       <Stack.Navigator initialRouteName="Login">
         <Stack.Screen name="Register" component={RegisterScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />
@@ -118,6 +126,7 @@ const App = () => {
         <Stack.Screen name="ScheduleDeliveries" component={ScheduleDeliveriesScreen} />
         <Stack.Screen name="TrackMedication" component={TrackMedicationScreen} />
       </Stack.Navigator>
+      </AuthProvider>
     </NavigationContainer>
   );
 };

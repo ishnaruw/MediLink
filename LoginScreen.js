@@ -3,11 +3,14 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'reac
 import * as SecureStore from 'expo-secure-store';
 import { Ionicons } from '@expo/vector-icons';
 import bcrypt from 'react-native-bcrypt';
+import { useAuth } from './AuthContext';
 
 const LoginScreen = ({ navigation }) => {
+  const { setIsLoggedIn } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  //const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     checkLogin();
@@ -18,6 +21,7 @@ const LoginScreen = ({ navigation }) => {
     const userPassword = await SecureStore.getItemAsync('userPassword');
     if (userEmail && userPassword) {
       // Automatically navigate to home if already logged in
+      setIsLoggedIn(true);
       navigation.navigate('Home');
     }
   };
@@ -28,23 +32,22 @@ const LoginScreen = ({ navigation }) => {
 
   const handleLogin = async () => {
     try {
-      // Retrieve stored email and hashed password from SecureStore
+      // Perform login authentication
       const storedEmail = await SecureStore.getItemAsync('userEmail');
       const storedPassword = await SecureStore.getItemAsync('userPassword');
-  
+
       if (!storedEmail || !storedPassword) {
         throw new Error('No email or password stored');
       }
-  
       // Trim inputs to remove leading/trailing whitespace
       const trimmedEmail = email.trim();
       const trimmedPassword = password.trim();
-  
       // Compare stored email and hashed password with input
       const isEmailMatch = trimmedEmail === storedEmail;
       const isPasswordMatch = bcrypt.compareSync(trimmedPassword, storedPassword);
-  
+
       if (isEmailMatch && isPasswordMatch) {
+        setIsLoggedIn(true);
         Alert.alert('Success', 'Login successful');
         navigation.navigate('Home');
       } else {
@@ -52,12 +55,9 @@ const LoginScreen = ({ navigation }) => {
       }
     } catch (error) {
       console.error('Error during login:', error.message);
-      Alert.alert('Error', 'Invalid email or password');
+      Alert.alert('Error', 'Login failed. Please try again later');
     }
   };
-  
-  
-  
 
   return (
     <View style={styles.container}>
