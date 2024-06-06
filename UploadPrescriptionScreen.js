@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Button, Image, Modal } from 'react-native';
+import { View, Text, StyleSheet, Button, Image, Modal, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
+import { useAuth } from './AuthContext';
+import * as SecureStore from 'expo-secure-store';
 
 const dummyPrescriptionImage = require('./assets/dummy_prescription.jpeg');
 
 const UploadPrescriptionScreen = () => {
   const navigation = useNavigation();
+  const { email } = useAuth();  // Get the email from the AuthContext
   const [selectedImage, setSelectedImage] = useState(null);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
@@ -32,13 +35,26 @@ const UploadPrescriptionScreen = () => {
         type: 'image/jpeg',
         name: 'photo.jpg',
       });
-
+  
       try {
-        const response = await axios.post('http://192.168.86.34:4000/upload', formData, {
+        // Retrieve the user's email address from device storage
+        const userEmail = await SecureStore.getItemAsync('userEmail');
+        if (!userEmail) {
+          throw new Error('User email not found');
+        }
+  
+        const url = 'http://192.168.86.34:4000/upload';
+        const params = { email: userEmail };
+  
+        // Append the email address as a query parameter to the URL
+        const fullUrl = `${url}?${new URLSearchParams(params).toString()}`;
+  
+        const response = await axios.post(fullUrl, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
         });
+  
         console.log('Upload success:', response.data);
         setShowSuccessMessage(true);
       } catch (error) {
@@ -58,22 +74,17 @@ const UploadPrescriptionScreen = () => {
     }
   }, [showSuccessMessage, navigation]);
 
-  const handleUploadPress = () => {
-    setShowSuccessMessage(true);
-  };
-
   const handleOKPress = () => {
     navigation.navigate('Home');
   };
 
   const handleCancelPress = () => {
-    console.log("Upload cancelled");
+    navigation.goBack();
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Upload Prescription Image</Text>
-      <Image source={dummyPrescriptionImage} style={styles.image} />
       <Modal
         visible={showSuccessMessage}
         animationType="slide"
@@ -92,11 +103,10 @@ const UploadPrescriptionScreen = () => {
       <View style={styles.container}>
         <Button title="Pick an image from gallery" onPress={pickImage} />
         {selectedImage && <Image source={{ uri: selectedImage.uri }} style={styles.image} />}
-        <Button title="Upload Image" onPress={uploadImage} />
+        {selectedImage && <Button title="Upload Image" onPress={uploadImage} />}
       </View>
       {!showSuccessMessage && (
         <View style={styles.buttonsContainer}>
-          <Button title="Upload" onPress={handleUploadPress} />
           <Button title="Cancel" onPress={handleCancelPress} />
         </View>
       )}
