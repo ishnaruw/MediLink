@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Button, Modal } from 'react-native';
+import { View, Text, StyleSheet, Button, Modal, TouchableOpacity } from 'react-native';
 import DatePicker from '@react-native-community/datetimepicker';
 import { FlatList } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
@@ -11,7 +11,7 @@ const ScheduleDeliveriesScreen = ({ navigation }) => {
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [medications, setMedications] = useState([]);
-  const errorMessage = "You cannot select a date in the past. Please select a new date.";
+  const [errorMessage, setErrorMessage] = useState("You cannot select a date in the past. Please select a new date.");
 
   useEffect(() => {
     // Fetch medications data from server based on user's email address
@@ -20,11 +20,12 @@ const ScheduleDeliveriesScreen = ({ navigation }) => {
         const userEmail = await SecureStore.getItemAsync('userEmail');
         console.log("userEmail: " + userEmail);
         const response = await fetch(`http://192.168.86.34:3100/get-medications/${userEmail}`);
-        // if (!response.ok) {
-        //   throw new Error('Failed to fetch medications');
-        // }
         const data = await response.json();
-        setMedications(data.medications);
+        if (response.ok) {
+          setMedications(data.medications);
+        } else {
+          setErrorMessage("No medicines ready for delivery");
+        }
       } catch (error) {
         console.error('Error fetching medications:', error);
       }
@@ -91,30 +92,46 @@ const ScheduleDeliveriesScreen = ({ navigation }) => {
     navigation.navigate('TrackMedication');
   };
 
+  const handleUploadPrescription = () => {
+    navigation.navigate('UploadPrescription');
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Medicines Ready for Delivery:</Text>
-      <View style={styles.medicinesContainer}>
-        <FlatList
-          data={medications}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id.toString()}
-          contentContainerStyle={{ paddingBottom: 20 }}
-        />
-      </View>
+      {errorMessage ? (
+        <View style={styles.errorMessageContainer}>
+          <Text style={styles.errorMessage}>{errorMessage}</Text>
+          <TouchableOpacity onPress={handleUploadPrescription}>
+            <Text style={styles.uploadPrescriptionLink}>Upload Prescription</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <>
+          <Text style={styles.title}>Medicines Ready for Delivery:</Text>
+          <View style={styles.medicinesContainer}>
+            <FlatList
+              data={medications}
+              renderItem={renderItem}
+              keyExtractor={(item) => item.id.toString()}
+              contentContainerStyle={{ paddingBottom: 20 }}
+            />
+          </View>
 
-      <View style={styles.datePickerContainer}>
-        <Text style={styles.title}>Select Delivery Date:</Text>
-        <DatePicker
-          style={styles.datePicker}
-          value={selectedDate}
-          mode="date"
-          display="default"
-          onChange={(event, date) => setSelectedDate(date)}
-        />
-      </View>
+          <View style={styles.datePickerContainer}>
+            <Text style={styles.title}>Select Delivery Date:</Text>
+            <DatePicker
+              style={styles.datePicker}
+              value={selectedDate}
+              mode="date"
+              display="default"
+              onChange={(event, date) => setSelectedDate(date)}
+            />
+          </View>
 
-      <Button title="Schedule Delivery" onPress={handleScheduleDelivery} />
+          <Button title="Schedule Delivery" onPress={handleScheduleDelivery} />
+        </>
+      )}
+
       {/* Error message modal */}
       <Modal
         animationType="slide"
@@ -129,7 +146,7 @@ const ScheduleDeliveriesScreen = ({ navigation }) => {
           </View>
         </View>
       </Modal>
-      
+
       {/* Success message modal */}
       <Modal
         visible={showSuccessModal}
@@ -154,6 +171,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#fff',
+  },
+  errorMessageContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+  },
+  errorMessage: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  uploadPrescriptionLink: {
+    fontSize: 16,
+    color: 'blue',
+    textDecorationLine: 'underline',
   },
   title: {
     fontSize: 20,
