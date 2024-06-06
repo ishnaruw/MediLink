@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import bcrypt from 'react-native-bcrypt';
 import { useAuth } from './AuthContext';
 import { useFocusEffect } from '@react-navigation/native'; // Import useFocusEffect
+import { CommonActions } from '@react-navigation/native';
 
 const LoginScreen = ({ navigation }) => {
   const { setIsLoggedIn } = useAuth();
@@ -39,6 +40,7 @@ const LoginScreen = ({ navigation }) => {
 
   const handleLogin = async () => {
     try {
+      //const isAuthenticated = false;
       const storedEmail = await SecureStore.getItemAsync('userEmail');
       const storedPassword = await SecureStore.getItemAsync('userPassword');
 
@@ -53,6 +55,13 @@ const LoginScreen = ({ navigation }) => {
 
       if (isEmailMatch && isPasswordMatch) {
         setIsLoggedIn(true);
+        //isAuthenticated = true;
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{ name: 'Home' }],
+          })
+        );
         Alert.alert('Success', 'Login successful');
         navigation.navigate('Home');
       } else {

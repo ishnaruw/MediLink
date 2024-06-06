@@ -1,49 +1,62 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 
 const TrackMedicationScreen = () => {
   const [selectedDate, setSelectedDate] = useState(null);
+  const [medications, setMedications] = useState([]);
 
   useEffect(() => {
-    const fetchSelectedDate = async () => {
+    const fetchDeliveryDateAndMedications = async () => {
       try {
-        const dateFromStorage = await AsyncStorage.getItem('selectedDate');
-        if (dateFromStorage) {
-          setSelectedDate(new Date(JSON.parse(dateFromStorage)));
+        const userEmail = await SecureStore.getItemAsync('userEmail');
+        const deliveryDateKey = `deliveryDate_${userEmail}`;
+        const medicationsKey = `medications_${userEmail}`;
+
+        const storedDate = await AsyncStorage.getItem(deliveryDateKey);
+        const storedMedications = await AsyncStorage.getItem(medicationsKey);
+
+        console.log("storedDate: " + storedDate);
+        console.log("storedMedications: " + storedMedications);
+
+        if (storedDate) {
+          setSelectedDate(new Date(storedDate));
+        }
+
+        if (storedMedications) {
+          setMedications(JSON.parse(storedMedications));
         }
       } catch (error) {
-        console.error('Error fetching selected date from AsyncStorage:', error);
+        console.error('Error fetching delivery date or medications:', error);
       }
     };
 
-    fetchSelectedDate();
+    fetchDeliveryDateAndMedications();
   }, []);
-
-  const medicines = [
-    { id: 1, name: 'Ibuprofen', quantity: 2, info: 'Take with food' },
-    { id: 2, name: 'Paracetamol (Acetaminophen)', quantity: 1, info: 'Before bedtime' },
-    { id: 3, name: 'Amoxicillin', quantity: 3, info: 'Twice daily' },
-  ];
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Track Medication</Text>
-      {selectedDate && (
-        <>
-          <Text style={styles.subtitle}>Delivery Date:</Text>
-          <Text style={styles.deliveryDate}>{selectedDate.toDateString()}</Text>
-        </>
+      {selectedDate ? (
+        <Text style={styles.text}>Scheduled Delivery Date: {selectedDate.toLocaleDateString()}</Text>
+      ) : (
+        <Text style={styles.text}>No scheduled delivery date found.</Text>
       )}
 
       <Text style={styles.subtitle}>Medicines:</Text>
-      {medicines.map((medicine) => (
-        <View key={medicine.id} style={styles.medicineContainer}>
-          <Text style={styles.medicineName}>{medicine.name}</Text>
-          <Text style={styles.medicineDetail}>Quantity: {medicine.quantity}</Text>
-          <Text style={styles.medicineDetail}>Info: {medicine.info}</Text>
-        </View>
-      ))}
+      {medications.length > 0 ? (
+        medications.map((medicine) => (
+          <View key={medicine.id} style={styles.medicineContainer}>
+            <Text style={styles.medicineName}>{medicine.name}</Text>
+            <Text style={styles.medicineDetail}>Quantity: {medicine.quantity_per_day}</Text>
+            <Text style={styles.medicineDetail}>Info: {medicine.info}</Text>
+            <Text style={styles.medicineDetail}>Total Quantity: {medicine.totalQuantity}</Text>
+          </View>
+        ))
+      ) : (
+        <Text style={styles.text}>No medicines found.</Text>
+      )}
 
       {/* Dummy tracking info */}
       <Text style={styles.subtitle}>Tracking Info:</Text>

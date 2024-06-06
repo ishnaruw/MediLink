@@ -96,9 +96,7 @@ const HomeScreen = ({ navigation }) => {
             <Text style={styles.buttonText}>Logout</Text>
           </TouchableOpacity>
         </View>
-        <View>
-          <Button title="Send SMS" onPress={sendSMS} />
-        </View>
+        <Button title="Contact Us" onPress={() => navigation.navigate('ContactUs')} />
       </View>
     );
   };
